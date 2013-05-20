@@ -1,0 +1,115 @@
+package com.tag.world;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import javax.naming.InitialContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class PlayerService
+ */
+@WebServlet(description = "service to get players information", urlPatterns = { "/Player" })
+public class PlayerService extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public PlayerService() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		String a = request.getParameter("player_id");
+		response.getWriter().append("a player " + a);
+
+		String query = "Select * FROM player";
+
+		/*
+		 * String dbUrl = "jdbc:mysql://127.0.0.1:3306/TagMyWorld"; String
+		 * dbClass = "com.mysql.jdbc.Driver";
+		 * 
+		 * try {
+		 * 
+		 * Class.forName(dbClass); Connection con =
+		 * DriverManager.getConnection(dbUrl, "root", "root"); Statement stmt =
+		 * con.createStatement(); ResultSet rs = stmt.executeQuery(query);
+		 * 
+		 * System.err.println(rs.getFetchSize() + " records");
+		 * 
+		 * while (rs.next()) { System.out.println(rs.getString(1));
+		 * System.out.println(rs.getLong("Id")); } // end while
+		 * 
+		 * con.close(); } // end try
+		 * 
+		 * catch (ClassNotFoundException e) { e.printStackTrace(); }
+		 * 
+		 * catch (SQLException e) { e.printStackTrace(); }
+		 */
+
+		Connection con = null;
+		try {
+			InitialContext cxt = new InitialContext();
+			if (cxt == null) {
+				throw new Exception("Uh oh -- no context!");
+			}
+
+			org.apache.tomcat.dbcp.dbcp.BasicDataSource ds = (org.apache.tomcat.dbcp.dbcp.BasicDataSource) cxt
+					.lookup("java:/comp/env/jdbc/TagMyWorldDB");
+
+			if (ds == null) {
+				throw new Exception("Data source not found!");
+			} else {
+				System.err.println(ds.getClass());
+				con = ds.getConnection();
+				Statement stmt = con.createStatement();
+				ResultSet rs = stmt.executeQuery(query);
+
+				System.err.println(rs.getFetchSize() + " records");
+
+				while (rs.next()) {
+					System.out.println(rs.getLong("Id"));
+					System.out.println(rs.getString("Name"));
+					System.err.println(rs.getClass());
+				} // end while
+
+				con.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (con != null)
+				try {
+					con.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+		}
+
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+	}
+
+}
